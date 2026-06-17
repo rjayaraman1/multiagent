@@ -103,7 +103,7 @@ Step 3 — Create the GitHub repo and push
 Go to github.com/new, create an empty repo (no README, no .gitignore — you already have those), then:
 
 
-git remote add origin https://github.com/<your-username>/<repo-name>.git
+git remote add upstream github.com:rjayaraman1/multiagent.git
 git branch -M main
 git push -u origin main
 Step 4 — Your API keys (answer to your question)
