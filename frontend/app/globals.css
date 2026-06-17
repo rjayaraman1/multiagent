@@ -1,0 +1,366 @@
+:root {
+  --bg: #f8fafc;
+  --panel: #ffffff;
+  --text: #0f172a;
+  --muted: #475569;
+  --border: #dbe4ee;
+  --accent: #2563eb;
+  --accent-2: #7c3aed;
+  --ring: #e2e8f0;
+}
+
+* { box-sizing: border-box; }
+html, body {
+  padding: 0;
+  margin: 0;
+  background: linear-gradient(160deg, #f0f4ff 0%, #faf5ff 50%, #f0fdf4 100%);
+  min-height: 100vh;
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+a { color: inherit; text-decoration: none; }
+button, input, select, textarea { font: inherit; }
+
+/* ── Page shell ─────────────────────────────────────────────────────────── */
+
+.page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px 20px 60px;
+}
+
+/* ── App header ─────────────────────────────────────────────────────────── */
+
+.app-header {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.app-title {
+  margin: 0;
+  font-size: clamp(22px, 3vw, 30px);
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.app-subtitle {
+  font-size: 13px;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+/* ── Workflow stepper ───────────────────────────────────────────────────── */
+
+.stepper {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.05);
+  backdrop-filter: blur(8px);
+}
+
+.stepper-step {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 2px 0;
+}
+
+.stepper-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.2s, color 0.2s;
+}
+
+.stepper-label {
+  font-size: 12px;
+  color: #94a3b8;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color 0.2s;
+}
+
+.stepper-arrow {
+  color: #cbd5e1;
+  font-size: 14px;
+  margin: 0 6px;
+  flex-shrink: 0;
+}
+
+.stepper-step--active .stepper-num {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: white;
+}
+
+.stepper-step--active .stepper-label {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.stepper-step--done .stepper-num {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.stepper-step--done .stepper-label {
+  color: #059669;
+  font-weight: 600;
+}
+
+/* ── Main two-column layout ─────────────────────────────────────────────── */
+
+.main-grid {
+  display: grid;
+  grid-template-columns: 38fr 62fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.left-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── Panel card ─────────────────────────────────────────────────────────── */
+
+.panel {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(15, 23, 42, 0.07);
+  padding: 20px;
+  backdrop-filter: blur(6px);
+}
+
+h1 { margin: 0 0 10px; font-size: clamp(28px, 4vw, 44px); line-height: 1.05; }
+h2 { margin: 0 0 8px; font-size: 20px; font-weight: 700; }
+p { color: var(--muted); line-height: 1.65; margin: 0 0 10px; }
+
+/* ── Form layout ────────────────────────────────────────────────────────── */
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.place-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.field label { font-size: 12px; color: #1e293b; font-weight: 600; letter-spacing: 0.02em; }
+
+.field input {
+  padding: 10px 13px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: white;
+  outline: none;
+  font-size: 14px;
+  color: var(--text);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.field input:focus {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.actions { display: flex; gap: 10px; margin-top: 14px; align-items: center; }
+
+.btn {
+  border: 0;
+  border-radius: 12px;
+  padding: 11px 20px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.28);
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.btn:hover:not(:disabled) { opacity: 0.92; transform: translateY(-1px); }
+.btn:disabled { opacity: 0.6; cursor: wait; }
+
+/* Agent label — consistent identifier for all agent panels */
+.agent-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+  margin-bottom: 6px;
+}
+
+.agent-label::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-2);
+  flex-shrink: 0;
+}
+
+.badge-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 11px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #f8fafc;
+  font-size: 12px;
+  color: #334155;
+  font-weight: 500;
+}
+
+/* ── Horoscope wheel ────────────────────────────────────────────────────── */
+
+.chart-wrap {
+  display: grid;
+  place-items: center;
+  min-height: 320px;
+  background: radial-gradient(circle at center, #ffffff 0%, #f8fafc 55%, #eef2ff 100%);
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(15, 23, 42, 0.07);
+}
+
+/* ── Reading / section cards ────────────────────────────────────────────── */
+
+.section-stack { display: grid; gap: 12px; margin-top: 14px; }
+
+.reading-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.reading-card h3 { margin: 0 0 6px; font-size: 14px; }
+.small { font-size: 12px; color: #64748b; }
+.footer-note { margin-top: 14px; font-size: 11px; color: #94a3b8; }
+
+/* ── Chat panel ─────────────────────────────────────────────────────────── */
+
+.chat-history {
+  min-height: 260px;
+  max-height: 420px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 2px;
+}
+
+.chat-bubble-user {
+  align-self: flex-end;
+  max-width: 85%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: white;
+  border-radius: 16px 16px 4px 16px;
+  padding: 10px 14px;
+  font-size: 14px;
+}
+
+.chat-bubble-assistant {
+  align-self: flex-start;
+  max-width: 92%;
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: 4px 16px 16px 16px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #334155;
+}
+
+.chat-bubble-text { white-space: pre-wrap; line-height: 1.65; }
+
+.chat-sources {
+  margin-top: 6px;
+  font-size: 11px;
+  color: #94a3b8;
+  border-top: 1px solid var(--border);
+  padding-top: 4px;
+}
+
+.chat-input-row { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+
+.chat-textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #334155;
+  resize: vertical;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+
+.chat-textarea:focus { border-color: #a78bfa; }
+
+.chat-send-btn {
+  align-self: flex-end;
+  padding: 11px 20px;
+  border-radius: 12px;
+  border: 0;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.22);
+  transition: opacity 0.15s;
+}
+
+.chat-send-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
+
+@media (max-width: 980px) {
+  .main-grid { grid-template-columns: 1fr; }
+  .place-grid { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+  .stepper { gap: 6px; }
+  .stepper-arrow { display: none; }
+}
