@@ -23,7 +23,14 @@ Criterion: {criterion}
 Question: {question}
 Response: {answer}
 
-Answer with a single character: Y (passes) or N (fails). Nothing else."""
+Score the response on a scale of 1 to 5:
+1 - Completely fails the criterion
+2 - Mostly fails, minor relevant content
+3 - Partially meets the criterion
+4 - Mostly meets the criterion
+5 - Fully meets the criterion
+
+Reply with a single digit (1, 2, 3, 4, or 5). Nothing else."""
 
 
 def log_chat(session_id: str, question: str, answer: str, sources: list[str]) -> None:
@@ -52,12 +59,17 @@ def read_log(session_id: str | None = None) -> list[dict]:
     return rows
 
 
-def _score(llm: Any, question: str, answer: str, criterion: str) -> int:
-    """Return 1 (pass) or 0 (fail) for the given criterion."""
+def _score(llm: Any, question: str, answer: str, criterion: str) -> float:
+    """Return a normalized score 0.0–1.0 for the given criterion (from a 1–5 rubric)."""
     prompt = _SCORE_PROMPT.format(criterion=criterion, question=question, answer=answer)
     response = llm.invoke(prompt)
-    verdict = response.content.strip().upper()
-    return 1 if verdict.startswith("Y") else 0
+    raw = response.content.strip()
+    try:
+        rating = int(raw[0])
+        rating = max(1, min(5, rating))  # clamp to [1, 5]
+    except (ValueError, IndexError):
+        rating = 1
+    return (rating - 1) / 4.0  # maps 1→0.0, 2→0.25, 3→0.5, 4→0.75, 5→1.0
 
 
 def run_langsmith_eval(session_id: str | None = None) -> dict:
@@ -110,63 +122,55 @@ def run_langsmith_eval(session_id: str | None = None) -> dict:
             dataset_id=dataset.id,
         )
 
-    # ── Evaluator functions (langsmith.evaluate protocol) ─────────────────
     _rel_criterion = "Is the response relevant and on-topic for the Vedic astrology question asked?"
     _qual_criterion = (
         "Is the response accurate, informative, and genuinely helpful as a Vedic astrology answer?"
     )
 
-    def eval_relevance(run: Any, example: Any) -> dict:
-        q = _inputs(example).get("question", "")
-        a = _inputs(example).get("answer", "")
-        return {"key": "relevance", "score": _score(llm, q, a, _rel_criterion)}
-
-    def eval_quality(run: Any, example: Any) -> dict:
-        q = _inputs(example).get("question", "")
-        a = _inputs(example).get("answer", "")
-        return {"key": "quality", "score": _score(llm, q, a, _qual_criterion)}
-
-    # ── Run experiment via langsmith.evaluate ──────────────────────────────
+    # ── Run experiment (no evaluators — we log feedback directly below) ────
+    # Passing evaluators through ls_evaluate's internal protocol silently
+    # drops scores in LangSmith 0.8.x. Using client.create_feedback() directly
+    # is the guaranteed path that always appears in the UI's p50/p90/p99.
     def target(inputs: dict) -> dict:
-        # The stored answer is already in inputs; just echo it as the "prediction"
         return {"answer": inputs.get("answer", "")}
 
     exp = ls_evaluate(
         target,
         data=DATASET_NAME,
-        evaluators=[eval_relevance, eval_quality],
+        evaluators=[],
         experiment_prefix="vedic-astro-eval",
         max_concurrency=1,
         blocking=True,
     )
 
-    # ── Collect per-row results ────────────────────────────────────────────
+    # ── Score each result and log feedback directly to LangSmith ──────────
     rows_with_scores: list[dict] = []
     all_rel: list[float] = []
     all_qual: list[float] = []
 
     for result in exp:
-        inputs = _inputs(_get(result, "example"))
-        q = inputs.get("question", "")
-        a = inputs.get("answer", "")[:200]
-        rel_score: int | None = None
-        qual_score: int | None = None
+        example = _get(result, "example")
+        run = _get(result, "run")
+        run_id = _get(run, "id")
 
-        for er in _get(_get(result, "evaluation_results"), "results") or []:
-            key = _get(er, "key")
-            score = _get(er, "score")
-            if key == "relevance":
-                rel_score = score
-                if score is not None:
-                    all_rel.append(score)
-            elif key == "quality":
-                qual_score = score
-                if score is not None:
-                    all_qual.append(score)
+        inputs = _inputs(example)
+        q = inputs.get("question", "")
+        a = inputs.get("answer", "")
+
+        rel_score = _score(llm, q, a, _rel_criterion)
+        qual_score = _score(llm, q, a, _qual_criterion)
+
+        # Direct feedback logging — bypasses evaluator protocol entirely
+        if run_id:
+            client.create_feedback(run_id=run_id, key="relevance", score=rel_score)
+            client.create_feedback(run_id=run_id, key="quality", score=qual_score)
+
+        all_rel.append(rel_score)
+        all_qual.append(qual_score)
 
         rows_with_scores.append({
             "question": q[:120],
-            "answer": a,
+            "answer": a[:200],
             "relevance": rel_score,
             "quality": qual_score,
         })

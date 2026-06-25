@@ -64,8 +64,8 @@ class EvalRequest(BaseModel):
 class EvalRow(BaseModel):
     question: str
     answer: str
-    relevance: Optional[int] = None
-    quality: Optional[int] = None
+    relevance: Optional[float] = None
+    quality: Optional[float] = None
 
 
 class EvalResponse(BaseModel):
