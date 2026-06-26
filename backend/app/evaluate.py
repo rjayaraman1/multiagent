@@ -104,17 +104,21 @@ def run_langsmith_eval(session_id: str | None = None) -> dict:
     client = Client()
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
-    # ── Re-create the dataset so every Evaluate click is a fresh run ─────────
+    # ── Refresh examples without deleting the dataset (preserves experiment history) ──
+    # Deleting the dataset also deletes all past experiments linked to it.
+    # Instead: keep the dataset alive, wipe only its examples, then re-add them.
+    # Each ls_evaluate() call below creates a NEW experiment (unique suffix), so
+    # all runs accumulate under the dataset's Experiments tab in LangSmith.
     try:
-        existing = client.read_dataset(dataset_name=DATASET_NAME)
-        client.delete_dataset(dataset_id=existing.id)
+        dataset = client.read_dataset(dataset_name=DATASET_NAME)
+        for ex in client.list_examples(dataset_id=dataset.id):
+            client.delete_example(ex.id)
     except Exception:
-        pass
+        dataset = client.create_dataset(
+            DATASET_NAME,
+            description="Vedic Astrology RAG chatbot — logged Q&A pairs for offline evaluation",
+        )
 
-    dataset = client.create_dataset(
-        DATASET_NAME,
-        description="Vedic Astrology RAG chatbot — logged Q&A pairs for offline evaluation",
-    )
     for row in rows:
         client.create_example(
             inputs={"question": row["question"], "answer": row["answer"]},
